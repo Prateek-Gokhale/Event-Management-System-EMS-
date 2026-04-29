@@ -24,6 +24,7 @@ body {
     radial-gradient(circle at 18% 12%, rgba(230, 57, 70, 0.1), transparent 32%),
     radial-gradient(circle at 82% 6%, rgba(15, 118, 110, 0.12), transparent 25%),
     linear-gradient(180deg, #f3efe6 0%, #f7f4ef 60%, #f0ece3 100%);
+  overflow-x: hidden;
 }
 
 a {
@@ -318,6 +319,8 @@ a {
 input,
 select,
 textarea {
+  width: 100%;
+  min-width: 0;
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 0.68rem 0.74rem;
@@ -585,6 +588,7 @@ textarea:focus {
 
 table {
   width: 100%;
+  min-width: 760px;
   border-collapse: collapse;
 }
 
@@ -771,10 +775,24 @@ th {
 }
 
 @media (max-width: 900px) {
+  .main-content {
+    width: min(720px, 94%);
+    margin-top: 1rem;
+  }
+
   .navbar {
     grid-template-columns: 1fr;
     gap: 0.7rem;
     padding: 0.7rem 0;
+  }
+
+  .brand {
+    justify-self: center;
+  }
+
+  .nav-links,
+  .nav-actions {
+    justify-content: center;
   }
 
   .hero,
@@ -792,18 +810,183 @@ th {
 }
 
 @media (max-width: 680px) {
+  .main-content {
+    width: min(100% - 1rem, 480px);
+    margin: 0.75rem auto 1.25rem;
+  }
+
+  .navbar {
+    width: min(100% - 1rem, 480px);
+  }
+
+  .brand {
+    font-size: 1.1rem;
+  }
+
+  .brand-mark {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+  }
+
   .nav-links {
+    justify-content: center;
     flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .nav-links a {
+    padding: 0.38rem 0.5rem;
+    font-size: 0.86rem;
   }
 
   .nav-actions {
-    justify-content: space-between;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  .welcome {
+    width: 100%;
+    text-align: center;
+  }
+
+  .btn {
+    padding: 0.56rem 0.8rem;
+  }
+
+  .hero {
+    gap: 0.75rem;
+  }
+
+  .hero-text,
+  .hero-highlights,
+  .card {
+    border-radius: 12px;
+    padding: 0.9rem;
+  }
+
+  .hero-text h1 {
+    font-size: 1.55rem;
+    line-height: 1.2;
+  }
+
+  .hero-text p {
+    line-height: 1.55;
+  }
+
+  .hero-actions,
+  .card-actions,
+  .modal-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hero-actions .btn,
+  .card-actions .btn,
+  .modal-actions .btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .home-events {
+    min-height: auto;
+    justify-content: flex-start;
+  }
+
+  .highlight-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .highlight-row b {
+    white-space: normal;
+  }
+
+  .section-head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .filters {
+    gap: 0.55rem;
+  }
+
+  .event-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .event-image {
+    height: 180px;
+  }
+
+  .event-meta,
+  .detail-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .details-image {
+    height: 230px;
+    border-radius: 12px;
+  }
+
+  .details-content {
+    padding: 1rem;
+    border-radius: 12px;
+  }
+
+  .form-card.wide,
+  .form-card {
+    width: 100%;
+  }
+
+  .stats-grid,
+  .panel-grid {
+    grid-template-columns: 1fr;
   }
 
   .cart-item,
   .cart-footer,
-  .detail-actions {
+  .cart-item-right,
+  .detail-actions,
+  .list-row {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .cart-item-right,
+  .inline-actions {
+    width: 100%;
+  }
+
+  .inline-actions .btn {
+    flex: 1 1 auto;
+  }
+
+  .table-wrap {
+    border-radius: 10px;
+  }
+
+  th,
+  td {
+    padding: 0.68rem;
+    font-size: 0.84rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .nav-links a,
+  .btn {
+    font-size: 0.82rem;
+  }
+
+  .hero-text h1 {
+    font-size: 1.38rem;
+  }
+
+  .event-image {
+    height: 160px;
   }
 }
