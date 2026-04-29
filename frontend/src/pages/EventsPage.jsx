@@ -5,6 +5,7 @@ import EventCard from "../components/EventCard";
 import Loader from "../components/Loader";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
+import { asArray } from "../utils/apiData";
 
 function EventsPage() {
   const [events, setEvents] = useState([]);
@@ -39,7 +40,7 @@ function EventsPage() {
     const loadAllEvents = async () => {
       try {
         const res = await api.get("/events");
-        setAllEvents(res.data);
+        setAllEvents(asArray(res.data));
       } catch {
         toast.error("Could not load filter options");
       }
@@ -60,7 +61,7 @@ function EventsPage() {
         if (minPrice) params.minPrice = minPrice;
         if (maxPrice) params.maxPrice = maxPrice;
         const res = await api.get("/events", { params });
-        setEvents(res.data);
+        setEvents(asArray(res.data));
       } catch {
         toast.error("Could not fetch events");
       } finally {
@@ -72,7 +73,7 @@ function EventsPage() {
 
   useEffect(() => {
     if (!isAuthenticated || isAdmin) return;
-    api.get("/favorites").then((res) => setFavorites(res.data)).catch(() => {});
+    api.get("/favorites").then((res) => setFavorites(asArray(res.data))).catch(() => {});
   }, [isAuthenticated, isAdmin]);
 
   const handleAdd = (eventItem) => {
@@ -94,7 +95,7 @@ function EventsPage() {
       const res = favorites.includes(eventItem.id)
         ? await api.delete(`/favorites/${eventItem.id}`)
         : await api.post(`/favorites/${eventItem.id}`);
-      setFavorites(res.data);
+      setFavorites(asArray(res.data));
     } catch {
       toast.error("Could not update wishlist");
     }

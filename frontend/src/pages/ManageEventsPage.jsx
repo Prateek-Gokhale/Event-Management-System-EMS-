@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import api from "../api/axiosClient";
 import Modal from "../components/Modal";
 import Loader from "../components/Loader";
+import { asArray } from "../utils/apiData";
 import { formatCurrency, formatDate } from "../utils/format";
 
 const initialForm = {
@@ -38,7 +39,7 @@ function ManageEventsPage() {
     setLoading(true);
     try {
       const res = await api.get("/events");
-      setEvents(res.data);
+      setEvents(asArray(res.data));
     } catch {
       toast.error("Unable to load events");
     } finally {

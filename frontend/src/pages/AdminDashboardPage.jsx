@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../api/axiosClient";
 import Loader from "../components/Loader";
+import { asArray } from "../utils/apiData";
 import { formatDate } from "../utils/format";
 
 function getErrorMessage(error, fallback) {
@@ -25,9 +26,9 @@ function AdminDashboardPage() {
         api.get("/events"),
         api.get("/admin/analytics"),
       ]);
-      setUsers(usersRes.data);
-      setBookings(bookingsRes.data);
-      setEvents(eventsRes.data);
+      setUsers(asArray(usersRes.data));
+      setBookings(asArray(bookingsRes.data));
+      setEvents(asArray(eventsRes.data));
       setAnalytics(analyticsRes.data);
     } catch {
       toast.error("Unable to load admin dashboard");

@@ -6,6 +6,7 @@ import Loader from "../components/Loader";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
+import { asArray } from "../utils/apiData";
 import { formatCurrency, formatDate } from "../utils/format";
 
 function LandingPage() {
@@ -18,7 +19,7 @@ function LandingPage() {
     const fetchEvents = async () => {
       try {
         const res = await api.get("/events");
-        setFeaturedEvents(res.data.slice(0, 3));
+        setFeaturedEvents(asArray(res.data).slice(0, 3));
       } catch {
         toast.error("Unable to load featured events");
       } finally {

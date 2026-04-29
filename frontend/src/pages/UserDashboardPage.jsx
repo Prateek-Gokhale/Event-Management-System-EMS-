@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import api from "../api/axiosClient";
 import Loader from "../components/Loader";
+import { asArray } from "../utils/apiData";
 import { formatCurrency, formatDate } from "../utils/format";
 
 function UserDashboardPage() {
@@ -12,7 +13,7 @@ function UserDashboardPage() {
       setLoading(true);
       try {
         const res = await api.get("/bookings/my");
-        setBookings(res.data);
+        setBookings(asArray(res.data));
       } catch {
         toast.error("Unable to fetch your bookings");
       } finally {

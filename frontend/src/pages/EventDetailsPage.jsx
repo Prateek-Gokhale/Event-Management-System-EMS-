@@ -5,6 +5,7 @@ import api from "../api/axiosClient";
 import Loader from "../components/Loader";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
+import { asArray } from "../utils/apiData";
 import { formatCurrency, formatDate } from "../utils/format";
 
 function EventDetailsPage() {
@@ -22,9 +23,9 @@ function EventDetailsPage() {
       setLoading(true);
       try {
         const res = await api.get(`/events/${id}`);
-        setEventItem(res.data);
+        setEventItem(typeof res.data === "object" && !Array.isArray(res.data) ? res.data : null);
         const reviewsRes = await api.get(`/events/${id}/reviews`);
-        setReviews(reviewsRes.data);
+        setReviews(asArray(reviewsRes.data));
       } catch {
         toast.error("Unable to load event");
       } finally {
@@ -65,8 +66,8 @@ function EventDetailsPage() {
         api.get(`/events/${id}`),
         api.get(`/events/${id}/reviews`),
       ]);
-      setEventItem(eventRes.data);
-      setReviews(reviewsRes.data);
+      setEventItem(typeof eventRes.data === "object" && !Array.isArray(eventRes.data) ? eventRes.data : null);
+      setReviews(asArray(reviewsRes.data));
       setReviewForm({ rating: "5", comment: "" });
       toast.success("Review saved");
     } catch (error) {
