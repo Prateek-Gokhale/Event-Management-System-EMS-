@@ -9,10 +9,6 @@ A full-stack Event Management System built with React, Spring Boot, JWT security
 | Resource | URL |
 | --- | --- |
 | Live Website | [ems.com](https://frontend-seven-topaz-40.vercel.app) |
-| Backend API | https://ems-backend-production-700f.up.railway.app |
-| Events API | https://ems-backend-production-700f.up.railway.app/api/events |
-| GitHub Repository | https://github.com/Prateek-Gokhale/Event-Management-System-EMS- |
-| Railway Project | https://railway.com/project/f68a3f6c-f98f-467a-9cdc-8b60fd73449a |
 
 ## Tech Stack
 

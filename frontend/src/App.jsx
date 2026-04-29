@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Footer from "./components/Footer";
 import Navbar from "./components/Navbar";
@@ -16,11 +16,13 @@ import UserDashboardPage from "./pages/UserDashboardPage";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
 function App() {
+  const location = useLocation();
+
   return (
     <div className="app-shell">
       <Navbar />
       <main className="main-content">
-        <ErrorBoundary>
+        <ErrorBoundary resetKey={location.pathname}>
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
