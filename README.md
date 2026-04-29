@@ -4,6 +4,17 @@ A full-stack Event Management System built with React, Spring Boot, JWT security
 
 ![EventHub Home](docs/images/eventhub-home.svg)
 
+## Live Links
+
+| Resource | URL |
+| --- | --- |
+| Live Frontend | https://frontend-seven-topaz-40.vercel.app |
+| Frontend Deployment | https://frontend-qf8uvluxp-prateek-gokhales-projects.vercel.app |
+| Backend API | https://ems-backend-production-700f.up.railway.app |
+| Events API | https://ems-backend-production-700f.up.railway.app/api/events |
+| GitHub Repository | https://github.com/Prateek-Gokhale/Event-Management-System-EMS- |
+| Railway Project | https://railway.com/project/f68a3f6c-f98f-467a-9cdc-8b60fd73449a |
+
 ## Tech Stack
 
 | Layer | Technology |
@@ -207,11 +218,11 @@ npm run build
 
 ## Deployment Notes
 
-Recommended deployment split:
+Current deployment split:
 
-- Frontend: Vercel or Netlify
-- Backend: Render or Railway
-- Database: Railway MySQL, Aiven MySQL, PlanetScale, or another hosted MySQL provider
+- Frontend: Vercel
+- Backend: Railway
+- Database: Railway MySQL
 
 Set `VITE_API_BASE_URL` in the frontend host to your backend API URL, and set `CORS_ALLOWED_ORIGINS` in the backend host to your frontend domain.
 
