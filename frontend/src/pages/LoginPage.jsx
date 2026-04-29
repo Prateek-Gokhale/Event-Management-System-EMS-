@@ -72,7 +72,6 @@ function LoginPage() {
         <div className="demo-hint">
           <span>Demo User: user@ems.com / User@123</span>
           <span>Demo Admin: admin@ems.com / Admin@123</span>
-          <span>If using SQL seed file: both passwords are `password`.</span>
         </div>
       </form>
     </div>
