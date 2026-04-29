@@ -8,7 +8,7 @@ A full-stack Event Management System built with React, Spring Boot, JWT security
 
 | Resource | URL |
 | --- | --- |
-| Live Frontend | https://frontend-seven-topaz-40.vercel.app |
+| Live Frontend | [ems.com](https://frontend-seven-topaz-40.vercel.app) |
 | Frontend Deployment | https://frontend-ad161qsy9-prateek-gokhales-projects.vercel.app |
 | Backend API | https://ems-backend-production-700f.up.railway.app |
 | Events API | https://ems-backend-production-700f.up.railway.app/api/events |
