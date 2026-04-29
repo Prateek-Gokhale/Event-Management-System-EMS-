@@ -1,7 +1,16 @@
 import axios from "axios";
 
+const FALLBACK_API_BASE_URL = "https://ems-backend-production-700f.up.railway.app/api";
+
+function getApiBaseUrl() {
+  const value = import.meta.env.VITE_API_BASE_URL || "";
+  const cleaned = value.replace(/^\uFEFF/, "").replace(/^ï»¿/, "").trim();
+  if (cleaned.startsWith("http") || cleaned.startsWith("/")) return cleaned;
+  return FALLBACK_API_BASE_URL;
+}
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8081/api",
+  baseURL: getApiBaseUrl(),
   timeout: 8000,
 });
 
