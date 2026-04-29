@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="640" viewBox="0 0 1200 640" role="img" aria-label="EventHub admin dashboard preview">
+  <rect width="1200" height="640" fill="#f6f4ef"/>
+  <rect x="64" y="48" width="1072" height="72" rx="16" fill="#fffefc" stroke="#e2ddd2"/>
+  <text x="92" y="93" font-family="Arial, sans-serif" font-size="30" font-weight="700" fill="#e63946">EventHub Admin</text>
+  <rect x="64" y="154" width="250" height="124" rx="16" fill="#fff" stroke="#e2ddd2"/>
+  <rect x="338" y="154" width="250" height="124" rx="16" fill="#fff" stroke="#e2ddd2"/>
+  <rect x="612" y="154" width="250" height="124" rx="16" fill="#fff" stroke="#e2ddd2"/>
+  <rect x="886" y="154" width="250" height="124" rx="16" fill="#fff" stroke="#e2ddd2"/>
+  <text x="94" y="198" font-family="Arial, sans-serif" font-size="18" fill="#5a6372">Total Users</text>
+  <text x="368" y="198" font-family="Arial, sans-serif" font-size="18" fill="#5a6372">Total Events</text>
+  <text x="642" y="198" font-family="Arial, sans-serif" font-size="18" fill="#5a6372">Bookings</text>
+  <text x="916" y="198" font-family="Arial, sans-serif" font-size="18" fill="#5a6372">Revenue</text>
+  <text x="94" y="248" font-family="Arial, sans-serif" font-size="42" font-weight="700" fill="#1f2229">128</text>
+  <text x="368" y="248" font-family="Arial, sans-serif" font-size="42" font-weight="700" fill="#1f2229">16</text>
+  <text x="642" y="248" font-family="Arial, sans-serif" font-size="42" font-weight="700" fill="#1f2229">42</text>
+  <text x="916" y="248" font-family="Arial, sans-serif" font-size="42" font-weight="700" fill="#1f2229">Rs 82k</text>
+  <rect x="64" y="312" width="516" height="250" rx="18" fill="#fffefc" stroke="#e2ddd2"/>
+  <rect x="620" y="312" width="516" height="250" rx="18" fill="#fffefc" stroke="#e2ddd2"/>
+  <text x="94" y="356" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#1f2229">Users</text>
+  <text x="650" y="356" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#1f2229">Bookings</text>
+  <line x1="94" y1="386" x2="540" y2="386" stroke="#e2ddd2"/>
+  <line x1="650" y1="386" x2="1096" y2="386" stroke="#e2ddd2"/>
+  <text x="94" y="428" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#1f2229">John User</text>
+  <text x="94" y="476" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#1f2229">EMS Admin</text>
+  <text x="650" y="428" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#1f2229">Tech Summit 2026</text>
+  <text x="650" y="476" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#1f2229">Food Carnival Weekend</text>
+  <rect x="970" y="406" width="96" height="32" rx="8" fill="#e63946"/>
+  <text x="994" y="428" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#fff">Accept</text>
+  <rect x="970" y="454" width="96" height="32" rx="8" fill="#0f766e"/>
+  <text x="994" y="476" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#fff">Check In</text>
+</svg>
