@@ -14,14 +14,17 @@ import java.util.List;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 public class DataSeeder {
 
     @Bean
-    public CommandLineRunner seedData(UserRepository userRepository, EventRepository eventRepository, CouponRepository couponRepository, PasswordEncoder passwordEncoder) {
+    public CommandLineRunner seedData(UserRepository userRepository, EventRepository eventRepository, CouponRepository couponRepository, PasswordEncoder passwordEncoder, JdbcTemplate jdbcTemplate) {
         return args -> {
+            repairBookingDefaults(jdbcTemplate);
+
             if (userRepository.count() == 0) {
                 User admin = new User();
                 admin.setName("EMS Admin");
@@ -51,6 +54,11 @@ public class DataSeeder {
                 couponRepository.saveAll(List.of(welcome, student));
             }
         };
+    }
+
+    private void repairBookingDefaults(JdbcTemplate jdbcTemplate) {
+        jdbcTemplate.execute("UPDATE bookings SET checked_in = false WHERE checked_in IS NULL");
+        jdbcTemplate.execute("ALTER TABLE bookings MODIFY checked_in BIT(1) NOT NULL DEFAULT b'0'");
     }
 
     private void syncSeedEvents(EventRepository eventRepository) {

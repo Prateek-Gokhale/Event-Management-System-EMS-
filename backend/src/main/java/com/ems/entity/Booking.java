@@ -52,7 +52,7 @@ public class Booking {
     @Column(name = "ticket_code", unique = true, length = 80)
     private String ticketCode;
 
-    @Column(name = "checked_in")
+    @Column(name = "checked_in", nullable = false)
     private boolean checkedIn = false;
 
     public Long getId() {
