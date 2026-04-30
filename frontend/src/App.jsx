@@ -3,6 +3,8 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import Footer from "./components/Footer";
 import Navbar from "./components/Navbar";
 import AddEventPage from "./pages/AddEventPage";
+import AdminBookingsPage from "./pages/AdminBookingsPage";
+import AdminCustomersPage from "./pages/AdminCustomersPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import CartPage from "./pages/CartPage";
 import EventDetailsPage from "./pages/EventDetailsPage";
@@ -66,6 +68,22 @@ function App() {
               element={
                 <ProtectedRoute requireAdmin>
                   <ManageEventsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/bookings"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminBookingsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/customers"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminCustomersPage />
                 </ProtectedRoute>
               }
             />

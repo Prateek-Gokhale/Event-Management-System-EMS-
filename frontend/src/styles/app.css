@@ -665,6 +665,30 @@ textarea:focus {
   margin-top: 1.1rem;
 }
 
+.chart-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 1rem;
+}
+
+.chart-card {
+  min-height: 342px;
+}
+
+.chart-card.wide {
+  grid-column: 1 / -1;
+}
+
+.chart-card h3 {
+  margin: 0 0 0.9rem;
+  font-family: "Space Grotesk", sans-serif;
+}
+
+.recharts-wrapper {
+  font-family: "Sora", sans-serif;
+}
+
 .table-wrap {
   overflow-x: auto;
   background: #fff;
@@ -1134,7 +1158,8 @@ th {
   }
 
   .stats-grid,
-  .panel-grid {
+  .panel-grid,
+  .chart-grid {
     grid-template-columns: 1fr;
   }
 

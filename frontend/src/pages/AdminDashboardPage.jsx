@@ -1,13 +1,26 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { toast } from "react-toastify";
 import api from "../api/axiosClient";
 import Loader from "../components/Loader";
 import { asArray } from "../utils/apiData";
-import { formatCurrency, formatDate } from "../utils/format";
 
-function getErrorMessage(error, fallback) {
-  return error?.response?.data?.message || error?.message || fallback;
+function monthKey(value) {
+  if (!value) return "Unknown";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Unknown";
+  return date.toLocaleString("en-IN", { month: "short", year: "2-digit" });
 }
 
 function AdminDashboardPage() {
@@ -17,49 +30,59 @@ function AdminDashboardPage() {
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const loadDashboard = async () => {
-    setLoading(true);
-    try {
-      const [usersRes, bookingsRes, eventsRes, analyticsRes] = await Promise.all([
-        api.get("/admin/users"),
-        api.get("/admin/bookings"),
-        api.get("/events"),
-        api.get("/admin/analytics"),
-      ]);
-      setUsers(asArray(usersRes.data));
-      setBookings(asArray(bookingsRes.data));
-      setEvents(asArray(eventsRes.data));
-      setAnalytics(analyticsRes.data);
-    } catch {
-      toast.error("Unable to load admin dashboard");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const loadDashboard = async () => {
+      setLoading(true);
+      try {
+        const [usersRes, bookingsRes, eventsRes, analyticsRes] = await Promise.all([
+          api.get("/admin/users"),
+          api.get("/admin/bookings"),
+          api.get("/events"),
+          api.get("/admin/analytics"),
+        ]);
+        setUsers(asArray(usersRes.data));
+        setBookings(asArray(bookingsRes.data));
+        setEvents(asArray(eventsRes.data));
+        setAnalytics(analyticsRes.data);
+      } catch {
+        toast.error("Unable to load admin dashboard");
+      } finally {
+        setLoading(false);
+      }
+    };
     loadDashboard();
   }, []);
 
-  const updateStatus = async (bookingId, status) => {
-    try {
-      await api.put(`/admin/bookings/${bookingId}/status`, { status });
-      toast.success(`Booking marked as ${status}`);
-      loadDashboard();
-    } catch (error) {
-      toast.error(getErrorMessage(error, "Status update failed"));
-    }
-  };
+  const bookingsByMonth = useMemo(() => {
+    const totals = new Map();
+    bookings.forEach((booking) => {
+      const key = monthKey(booking.bookingDate);
+      totals.set(key, (totals.get(key) || 0) + 1);
+    });
+    return Array.from(totals, ([month, bookingsCount]) => ({ month, bookings: bookingsCount }));
+  }, [bookings]);
 
-  const checkIn = async (bookingId) => {
-    try {
-      await api.put(`/admin/bookings/${bookingId}/check-in`);
-      toast.success("Ticket checked in");
-      loadDashboard();
-    } catch (error) {
-      toast.error(getErrorMessage(error, "Check-in failed"));
-    }
-  };
+  const revenueByMonth = useMemo(() => {
+    const totals = new Map();
+    bookings
+      .filter((booking) => booking.status === "BOOKED")
+      .forEach((booking) => {
+        const key = monthKey(booking.bookingDate);
+        const amount = Number(booking.finalPrice || booking.eventPrice || 0);
+        totals.set(key, (totals.get(key) || 0) + amount);
+      });
+    return Array.from(totals, ([month, revenue]) => ({ month, revenue }));
+  }, [bookings]);
+
+  const eventPopularity = useMemo(() => {
+    const totals = new Map();
+    bookings.forEach((booking) => {
+      totals.set(booking.eventName, (totals.get(booking.eventName) || 0) + 1);
+    });
+    return Array.from(totals, ([event, bookingsCount]) => ({ event, bookings: bookingsCount }))
+      .sort((a, b) => b.bookings - a.bookings)
+      .slice(0, 6);
+  }, [bookings]);
 
   if (loading) return <Loader />;
 
@@ -87,14 +110,14 @@ function AdminDashboardPage() {
           <strong>Delete Event</strong>
           <span>Remove events that should no longer be available.</span>
         </Link>
-        <a className="operation-card" href="#booked-details">
+        <Link className="operation-card" to="/admin/bookings">
           <strong>Booked Details</strong>
-          <span>Review all customer bookings, tickets, payment status, and check-ins.</span>
-        </a>
-        <a className="operation-card" href="#customer-details">
+          <span>Review customer bookings, tickets, payment status, and check-ins.</span>
+        </Link>
+        <Link className="operation-card" to="/admin/customers">
           <strong>View Customers</strong>
           <span>See registered customers and their total bookings.</span>
-        </a>
+        </Link>
       </div>
 
       <div className="stats-grid">
@@ -116,103 +139,55 @@ function AdminDashboardPage() {
         </div>
       </div>
 
-      <div className="dashboard-section" id="customer-details">
-        <div className="section-head">
-          <h2>Customer Details</h2>
-        </div>
-        <div className="table-wrap">
-          {users.length === 0 ? (
-            <div className="empty">No customers available.</div>
+      <div className="chart-grid">
+        <div className="card chart-card">
+          <h3>Bookings Per Month</h3>
+          {bookingsByMonth.length === 0 ? (
+            <div className="empty">No booking data yet.</div>
           ) : (
-            <table>
-              <thead>
-                <tr>
-                  <th>Customer ID</th>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Role</th>
-                  <th>Total Bookings</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((appUser) => (
-                  <tr key={appUser.id}>
-                    <td>{appUser.id}</td>
-                    <td>{appUser.name}</td>
-                    <td>{appUser.email}</td>
-                    <td>
-                      <span className="chip">{appUser.role}</span>
-                    </td>
-                    <td>{appUser.totalBookings ?? 0}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <ResponsiveContainer width="100%" height={260}>
+              <BarChart data={bookingsByMonth}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis allowDecimals={false} />
+                <Tooltip />
+                <Bar dataKey="bookings" fill="#e63946" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           )}
         </div>
-      </div>
 
-      <div className="dashboard-section" id="booked-details">
-        <div className="section-head">
-          <h2>Booked Details</h2>
-        </div>
-        <div className="table-wrap">
-          {bookings.length === 0 ? (
-            <div className="empty">No bookings available.</div>
+        <div className="card chart-card">
+          <h3>Revenue Graph</h3>
+          {revenueByMonth.length === 0 ? (
+            <div className="empty">No revenue data yet.</div>
           ) : (
-            <table>
-              <thead>
-                <tr>
-                  <th>Booking ID</th>
-                  <th>Customer</th>
-                  <th>Event</th>
-                  <th>Event Date</th>
-                  <th>Booked On</th>
-                  <th>Amount</th>
-                  <th>Payment</th>
-                  <th>Ticket</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {bookings.map((booking) => (
-                  <tr key={booking.id}>
-                    <td>{booking.id}</td>
-                    <td>{booking.userName}</td>
-                    <td>{booking.eventName}</td>
-                    <td>{formatDate(booking.eventDate)}</td>
-                    <td>{formatDate(booking.bookingDate)}</td>
-                    <td>{formatCurrency(booking.finalPrice || booking.eventPrice)}</td>
-                    <td>{booking.paymentStatus || "N/A"}</td>
-                    <td>{booking.ticketCode || "N/A"}</td>
-                    <td>
-                      <span className={`status ${booking.status === "BOOKED" ? "ok" : booking.status === "PENDING" ? "pending" : "cancel"}`}>
-                        {booking.checkedIn ? "CHECKED IN" : booking.status}
-                      </span>
-                    </td>
-                    <td>
-                      <div className="inline-actions">
-                        <button
-                          className="btn tiny"
-                          onClick={() => updateStatus(booking.id, "BOOKED")}
-                          disabled={booking.status !== "PENDING"}
-                        >
-                          Accept
-                        </button>
-                        <button
-                          className="btn tiny"
-                          onClick={() => checkIn(booking.id)}
-                          disabled={booking.checkedIn || booking.status !== "BOOKED"}
-                        >
-                          {booking.checkedIn ? "Checked In" : "Check In"}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <ResponsiveContainer width="100%" height={260}>
+              <LineChart data={revenueByMonth}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip formatter={(value) => [`Rs ${Number(value).toLocaleString("en-IN")}`, "Revenue"]} />
+                <Line type="monotone" dataKey="revenue" stroke="#0f766e" strokeWidth={3} dot={{ r: 4 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+
+        <div className="card chart-card wide">
+          <h3>Events Popularity</h3>
+          {eventPopularity.length === 0 ? (
+            <div className="empty">No event popularity data yet.</div>
+          ) : (
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={eventPopularity} layout="vertical" margin={{ left: 18, right: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" allowDecimals={false} />
+                <YAxis dataKey="event" type="category" width={150} />
+                <Tooltip />
+                <Bar dataKey="bookings" fill="#0f766e" radius={[0, 6, 6, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           )}
         </div>
       </div>
