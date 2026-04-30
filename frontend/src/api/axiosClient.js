@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const FALLBACK_API_BASE_URL = "https://ems-backend-production-700f.up.railway.app/api";
+const FALLBACK_API_BASE_URL = "/api";
 
 function getApiBaseUrl() {
   const value = import.meta.env.VITE_API_BASE_URL || "";

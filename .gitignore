@@ -1,5 +1,6 @@
 # Backend
 backend/target/
+backend/*.log
 
 # Frontend
 frontend/node_modules/
