@@ -116,19 +116,6 @@ function AdminDashboardPage() {
         </div>
       </div>
 
-      {analytics?.popularCategories && (
-        <div className="card analytics-strip">
-          <h3>Popular Categories</h3>
-          <div className="inline-actions">
-            {Object.entries(analytics.popularCategories).map(([name, count]) => (
-              <span className="chip" key={name}>
-                {name}: {count}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-
       <div className="dashboard-section" id="customer-details">
         <div className="section-head">
           <h2>Customer Details</h2>
