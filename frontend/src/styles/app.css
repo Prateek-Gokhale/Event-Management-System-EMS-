@@ -674,19 +674,46 @@ textarea:focus {
 
 .chart-card {
   min-height: 342px;
+  overflow: hidden;
 }
 
 .chart-card.wide {
   grid-column: 1 / -1;
 }
 
-.chart-card h3 {
-  margin: 0 0 0.9rem;
+.chart-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-bottom: 0.9rem;
+}
+
+.chart-head h3 {
+  margin: 0;
   font-family: "Space Grotesk", sans-serif;
+}
+
+.chart-head span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .recharts-wrapper {
   font-family: "Sora", sans-serif;
+}
+
+.recharts-cartesian-axis-tick text {
+  fill: var(--muted);
+  font-size: 0.76rem;
+}
+
+.recharts-tooltip-wrapper .recharts-default-tooltip {
+  border: 1px solid var(--line) !important;
+  border-radius: 10px;
+  box-shadow: var(--shadow);
 }
 
 .table-wrap {
