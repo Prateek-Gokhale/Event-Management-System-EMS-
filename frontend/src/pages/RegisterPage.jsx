@@ -25,7 +25,7 @@ function RegisterPage() {
       const res = await api.post("/auth/register", form);
       login(res.data);
       toast.success("Registration successful");
-      navigate("/events");
+      navigate("/");
     } catch (error) {
       toast.error(error?.response?.data?.message || "Registration failed");
     } finally {

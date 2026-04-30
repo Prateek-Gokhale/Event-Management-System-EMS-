@@ -9,7 +9,7 @@ function ProtectedRoute({ children, requireAdmin = false }) {
   }
 
   if (requireAdmin && !isAdmin) {
-    return <Navigate to="/events" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return children;

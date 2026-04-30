@@ -27,7 +27,7 @@ function LoginPage() {
       if (res.data.role === "ADMIN") {
         navigate("/admin");
       } else {
-        navigate("/events");
+        navigate("/");
       }
     } catch (error) {
       toast.error(error?.response?.data?.message || "Login failed");
