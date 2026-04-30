@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import api from "../api/axiosClient";
 import Loader from "../components/Loader";
 import { asArray } from "../utils/apiData";
-import { formatDate } from "../utils/format";
+import { formatCurrency, formatDate } from "../utils/format";
 
 function getErrorMessage(error, fallback) {
   return error?.response?.data?.message || error?.message || fallback;
@@ -77,9 +77,32 @@ function AdminDashboardPage() {
         </div>
       </div>
 
+      <div className="operation-grid">
+        <Link className="operation-card" to="/admin/events/add">
+          <strong>Add Event</strong>
+          <span>Create a new event for users to book.</span>
+        </Link>
+        <Link className="operation-card" to="/admin/events/manage">
+          <strong>Update Event</strong>
+          <span>Edit event date, price, venue, capacity, and organizer details.</span>
+        </Link>
+        <Link className="operation-card" to="/admin/events/manage">
+          <strong>Delete Event</strong>
+          <span>Remove events that should no longer be available.</span>
+        </Link>
+        <a className="operation-card" href="#booked-details">
+          <strong>Booked Details</strong>
+          <span>Review all customer bookings, tickets, payment status, and check-ins.</span>
+        </a>
+        <a className="operation-card" href="#customer-details">
+          <strong>View Customers</strong>
+          <span>See registered customers and their total bookings.</span>
+        </a>
+      </div>
+
       <div className="stats-grid">
         <div className="stat-card">
-          <span>Total Users</span>
+          <span>Total Customers</span>
           <strong>{users.length}</strong>
         </div>
         <div className="stat-card">
@@ -109,61 +132,103 @@ function AdminDashboardPage() {
         </div>
       )}
 
-      <div className="panel-grid">
-        <div className="card">
-          <h3>Users</h3>
+      <div className="dashboard-section" id="customer-details">
+        <div className="section-head">
+          <h2>Customer Details</h2>
+        </div>
+        <div className="table-wrap">
           {users.length === 0 ? (
-            <p>No users available.</p>
+            <div className="empty">No customers available.</div>
           ) : (
-            users.map((appUser) => (
-              <div key={appUser.id} className="list-row">
-                <div>
-                  <strong>{appUser.name}</strong>
-                  <p>{appUser.email}</p>
-                </div>
-                <div className="inline-actions">
-                  <span className="chip">{appUser.role}</span>
-                </div>
-              </div>
-            ))
+            <table>
+              <thead>
+                <tr>
+                  <th>Customer ID</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Total Bookings</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((appUser) => (
+                  <tr key={appUser.id}>
+                    <td>{appUser.id}</td>
+                    <td>{appUser.name}</td>
+                    <td>{appUser.email}</td>
+                    <td>
+                      <span className="chip">{appUser.role}</span>
+                    </td>
+                    <td>{appUser.totalBookings ?? 0}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
+      </div>
 
-        <div className="card">
-          <h3>Bookings</h3>
+      <div className="dashboard-section" id="booked-details">
+        <div className="section-head">
+          <h2>Booked Details</h2>
+        </div>
+        <div className="table-wrap">
           {bookings.length === 0 ? (
-            <p>No bookings available.</p>
+            <div className="empty">No bookings available.</div>
           ) : (
-            bookings.slice(0, 8).map((booking) => (
-              <div key={booking.id} className="list-row">
-                <div>
-                  <strong>{booking.eventName}</strong>
-                  <p>
-                    {booking.userName} - {formatDate(booking.bookingDate)}
-                    {booking.ticketCode ? ` - ${booking.ticketCode}` : ""}
-                  </p>
-                  <span className={`status ${booking.status === "BOOKED" ? "ok" : booking.status === "PENDING" ? "pending" : "cancel"}`}>
-                    {booking.checkedIn ? "CHECKED IN" : booking.status}
-                  </span>
-                </div>
-                <div className="inline-actions">
-                  <button
-                    className="btn tiny"
-                    onClick={() => updateStatus(booking.id, "BOOKED")}
-                    disabled={booking.status !== "PENDING"}
-                  >
-                    Accept
-                  </button>
-                  <button
-                    className="btn tiny"
-                    onClick={() => checkIn(booking.id)}
-                    disabled={booking.checkedIn || booking.status !== "BOOKED"}
-                  >
-                    {booking.checkedIn ? "Checked In" : "Check In"}
-                  </button>
-                </div>
-              </div>
-            ))
+            <table>
+              <thead>
+                <tr>
+                  <th>Booking ID</th>
+                  <th>Customer</th>
+                  <th>Event</th>
+                  <th>Event Date</th>
+                  <th>Booked On</th>
+                  <th>Amount</th>
+                  <th>Payment</th>
+                  <th>Ticket</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {bookings.map((booking) => (
+                  <tr key={booking.id}>
+                    <td>{booking.id}</td>
+                    <td>{booking.userName}</td>
+                    <td>{booking.eventName}</td>
+                    <td>{formatDate(booking.eventDate)}</td>
+                    <td>{formatDate(booking.bookingDate)}</td>
+                    <td>{formatCurrency(booking.finalPrice || booking.eventPrice)}</td>
+                    <td>{booking.paymentStatus || "N/A"}</td>
+                    <td>{booking.ticketCode || "N/A"}</td>
+                    <td>
+                      <span className={`status ${booking.status === "BOOKED" ? "ok" : booking.status === "PENDING" ? "pending" : "cancel"}`}>
+                        {booking.checkedIn ? "CHECKED IN" : booking.status}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="inline-actions">
+                        <button
+                          className="btn tiny"
+                          onClick={() => updateStatus(booking.id, "BOOKED")}
+                          disabled={booking.status !== "PENDING"}
+                        >
+                          Accept
+                        </button>
+                        <button
+                          className="btn tiny"
+                          onClick={() => checkIn(booking.id)}
+                          disabled={booking.checkedIn || booking.status !== "BOOKED"}
+                        >
+                          {booking.checkedIn ? "Checked In" : "Check In"}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
       </div>
