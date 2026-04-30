@@ -6,7 +6,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://localhost:8081",
+        target: "https://ems-backend-production-700f.up.railway.app",
         changeOrigin: true,
       },
     },
