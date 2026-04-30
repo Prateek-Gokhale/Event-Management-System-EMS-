@@ -68,9 +68,6 @@ function AdminDashboardPage() {
       <div className="section-head split">
         <h2>Admin Dashboard</h2>
         <div className="inline-actions">
-          <Link className="btn primary" to="/admin/events/add">
-            Add Event
-          </Link>
           <Link className="btn ghost" to="/admin/events/manage">
             Manage Events
           </Link>
