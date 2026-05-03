@@ -4,12 +4,6 @@ A full-stack Event Management System built with React, Spring Boot, JWT security
 
 ![EventHub Home](docs/images/eventhub-home.svg)
 
-## Live Links
-
-| Resource | URL |
-| --- | --- |
-| Live Website | [ems.com](https://frontend-seven-topaz-40.vercel.app) |
-
 ## Tech Stack
 
 | Layer | Technology |
