@@ -1338,9 +1338,49 @@ th {
   transition: color 0.2s ease, background 0.2s ease;
 }
 
+.footer p {
+  margin: 0;
+}
+
 .footer:hover {
   color: var(--ink);
   background: color-mix(in srgb, var(--panel) 86%, transparent);
+}
+
+.footer-socials {
+  display: flex;
+  justify-content: center;
+  gap: 0.65rem;
+  margin-top: 0.65rem;
+}
+
+.footer-socials a {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--muted);
+  background: var(--panel-strong);
+  transition: transform 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.footer-socials a:hover {
+  color: var(--brand);
+  border-color: rgba(230, 57, 70, 0.38);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(31, 34, 41, 0.1);
+}
+
+.footer-socials svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .ai-chat {
