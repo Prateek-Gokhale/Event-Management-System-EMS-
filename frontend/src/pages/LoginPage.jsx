@@ -1,17 +1,23 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../api/axiosClient";
 import { useAuth } from "../context/AuthContext";
 
+const EMPTY_FORM = {
+  email: "",
+  password: "",
+};
+
 function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-  });
+  const [form, setForm] = useState(EMPTY_FORM);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setForm(EMPTY_FORM);
+  }, []);
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -38,7 +44,7 @@ function LoginPage() {
 
   return (
     <div className="form-layout">
-      <form className="card form-card" onSubmit={handleSubmit}>
+      <form className="card form-card" onSubmit={handleSubmit} autoComplete="off">
         <h2>Welcome Back</h2>
         <p>Login to book events and manage your dashboard.</p>
         <label>
@@ -49,6 +55,7 @@ function LoginPage() {
             value={form.email}
             onChange={handleChange}
             placeholder="you@example.com"
+            autoComplete="off"
             required
           />
         </label>
@@ -60,6 +67,7 @@ function LoginPage() {
             value={form.password}
             onChange={handleChange}
             placeholder="Enter password"
+            autoComplete="new-password"
             required
           />
         </label>

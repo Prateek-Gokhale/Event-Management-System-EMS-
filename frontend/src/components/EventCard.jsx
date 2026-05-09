@@ -1,10 +1,17 @@
 import { Link } from "react-router-dom";
 import { formatCurrency, formatDate } from "../utils/format";
+import { optimizedImageUrl } from "../utils/images";
 
 function EventCard({ event, onAddToCart, onToggleFavorite, isFavorite = false, showActions = true }) {
   return (
     <article className="event-card">
-      <img src={event.imageUrl} alt={event.name} className="event-image" />
+      <img
+        src={optimizedImageUrl(event.imageUrl)}
+        alt={event.name}
+        className="event-image"
+        loading="lazy"
+        decoding="async"
+      />
       <div className="event-content">
         <div className="chip">{event.category}</div>
         <h3>{event.name}</h3>

@@ -5,24 +5,36 @@ import com.ems.dto.event.EventResponse;
 import com.ems.entity.Event;
 import com.ems.entity.Review;
 import com.ems.entity.enums.BookingStatus;
+import com.ems.exception.BadRequestException;
 import com.ems.exception.ResourceNotFoundException;
 import com.ems.repository.BookingRepository;
+import com.ems.repository.BookingEventStats;
 import com.ems.repository.EventRepository;
 import com.ems.repository.FavoriteRepository;
 import com.ems.repository.ReviewRepository;
+import com.ems.repository.ReviewEventStats;
 import com.ems.service.EventService;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
-import java.util.Comparator;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import jakarta.persistence.criteria.Predicate;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EventServiceImpl implements EventService {
+
+    private static final List<BookingStatus> ACTIVE_BOOKING_STATUSES = List.of(BookingStatus.BOOKED, BookingStatus.PENDING);
 
     private final EventRepository eventRepository;
     private final BookingRepository bookingRepository;
@@ -42,23 +54,27 @@ public class EventServiceImpl implements EventService {
         String searchFilter = search == null ? "" : search.trim().toLowerCase(Locale.ROOT);
         String cityFilter = city == null ? "" : city.trim().toLowerCase(Locale.ROOT);
 
-        return eventRepository.findAll()
+        List<Event> events = eventRepository.findAll(
+                        buildEventSpecification(categoryFilter, searchFilter, cityFilter, from, to, minPrice, maxPrice),
+                        Sort.by(Sort.Direction.ASC, "date")
+                );
+        return mapEventResponses(events);
+    }
+
+    private List<EventResponse> mapEventResponses(List<Event> events) {
+        if (events.isEmpty()) {
+            return List.of();
+        }
+        List<Long> eventIds = events.stream().map(Event::getId).toList();
+        Map<Long, BookingEventStats> bookingStats = bookingRepository.findEventStats(eventIds, ACTIVE_BOOKING_STATUSES)
                 .stream()
-                .filter(event -> categoryFilter.isBlank() || event.getCategory().toLowerCase(Locale.ROOT).contains(categoryFilter))
-                .filter(event -> cityFilter.isBlank() || (event.getCity() != null && event.getCity().toLowerCase(Locale.ROOT).contains(cityFilter)))
-                .filter(event -> from == null || !event.getDate().toLocalDate().isBefore(from))
-                .filter(event -> to == null || !event.getDate().toLocalDate().isAfter(to))
-                .filter(event -> minPrice == null || event.getPrice().compareTo(minPrice) >= 0)
-                .filter(event -> maxPrice == null || event.getPrice().compareTo(maxPrice) <= 0)
-                .filter(event -> {
-                    if (searchFilter.isBlank()) {
-                        return true;
-                    }
-                    return event.getName().toLowerCase(Locale.ROOT).contains(searchFilter)
-                            || event.getDescription().toLowerCase(Locale.ROOT).contains(searchFilter);
-                })
-                .sorted(Comparator.comparing(Event::getDate))
-                .map(this::mapEventResponse)
+                .collect(Collectors.toMap(BookingEventStats::getEventId, Function.identity()));
+        Map<Long, ReviewEventStats> reviewStats = reviewRepository.findEventStats(eventIds)
+                .stream()
+                .collect(Collectors.toMap(ReviewEventStats::getEventId, Function.identity()));
+
+        return events.stream()
+                .map(event -> mapEventResponse(event, bookingStats.get(event.getId()), reviewStats.get(event.getId())))
                 .toList();
     }
 
@@ -79,6 +95,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventResponse updateEvent(Long id, EventRequest request) {
         Event event = findEvent(id);
+        validateCapacityChange(event, request);
         applyRequest(event, request);
         Event updated = eventRepository.save(event);
         return mapEventResponse(updated);
@@ -99,6 +116,46 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + id));
     }
 
+    private Specification<Event> buildEventSpecification(
+            String category,
+            String search,
+            String city,
+            LocalDate from,
+            LocalDate to,
+            BigDecimal minPrice,
+            BigDecimal maxPrice
+    ) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (!category.isBlank()) {
+                predicates.add(cb.like(cb.lower(root.get("category")), "%" + category + "%"));
+            }
+            if (!city.isBlank()) {
+                predicates.add(cb.like(cb.lower(root.get("city")), "%" + city + "%"));
+            }
+            if (from != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("date"), from.atStartOfDay()));
+            }
+            if (to != null) {
+                predicates.add(cb.lessThan(root.get("date"), to.plusDays(1).atStartOfDay()));
+            }
+            if (minPrice != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("price"), minPrice));
+            }
+            if (maxPrice != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("price"), maxPrice));
+            }
+            if (!search.isBlank()) {
+                String pattern = "%" + search + "%";
+                predicates.add(cb.or(
+                        cb.like(cb.lower(root.get("name")), pattern),
+                        cb.like(cb.lower(root.get("description")), pattern)
+                ));
+            }
+            return cb.and(predicates.toArray(Predicate[]::new));
+        };
+    }
+
     private void applyRequest(Event event, EventRequest request) {
         event.setName(request.getName().trim());
         event.setCategory(request.getCategory().trim());
@@ -114,11 +171,41 @@ public class EventServiceImpl implements EventService {
         event.setOrganizerContact(clean(request.getOrganizerContact()));
     }
 
+    private void validateCapacityChange(Event event, EventRequest request) {
+        long reservedSeats = bookingRepository.countByEventIdAndStatusIn(event.getId(), ACTIVE_BOOKING_STATUSES);
+        if (request.getCapacity() != null && request.getCapacity() < reservedSeats) {
+            throw new BadRequestException("Capacity cannot be lower than existing active bookings");
+        }
+    }
+
     private EventResponse mapEventResponse(Event event) {
+        return mapEventResponse(
+                event,
+                singleBookingStats(event.getId()),
+                singleReviewStats(event.getId())
+        );
+    }
+
+    private BookingEventStats singleBookingStats(Long eventId) {
+        return bookingRepository.findEventStats(List.of(eventId), ACTIVE_BOOKING_STATUSES)
+                .stream()
+                .findFirst()
+                .orElse(null);
+    }
+
+    private ReviewEventStats singleReviewStats(Long eventId) {
+        return reviewRepository.findEventStats(List.of(eventId))
+                .stream()
+                .findFirst()
+                .orElse(null);
+    }
+
+    private EventResponse mapEventResponse(Event event, BookingEventStats bookingStats, ReviewEventStats reviewStats) {
         int capacity = event.getCapacity() == null ? 100 : event.getCapacity();
-        long bookedSeats = bookingRepository.countByEventIdAndStatus(event.getId(), BookingStatus.BOOKED);
-        List<Review> reviews = reviewRepository.findByEventIdOrderByCreatedAtDesc(event.getId());
-        double averageRating = reviews.stream().mapToInt(Review::getRating).average().orElse(0.0);
+        long bookedSeats = bookingStats == null || bookingStats.getBookedSeats() == null ? 0 : bookingStats.getBookedSeats();
+        long reservedSeats = bookingStats == null || bookingStats.getReservedSeats() == null ? 0 : bookingStats.getReservedSeats();
+        double averageRating = reviewStats == null || reviewStats.getAverageRating() == null ? 0.0 : reviewStats.getAverageRating();
+        long reviewCount = reviewStats == null || reviewStats.getReviewCount() == null ? 0 : reviewStats.getReviewCount();
         EventResponse response = new EventResponse();
         response.setId(event.getId());
         response.setName(event.getName());
@@ -129,7 +216,7 @@ public class EventServiceImpl implements EventService {
         response.setImageUrl(event.getImageUrl());
         response.setCapacity(capacity);
         response.setBookedSeats(bookedSeats);
-        response.setAvailableSeats(Math.max(0, capacity - bookedSeats));
+        response.setAvailableSeats(Math.max(0, capacity - reservedSeats));
         response.setVenue(event.getVenue());
         response.setCity(event.getCity());
         response.setAddress(event.getAddress());
@@ -137,7 +224,7 @@ public class EventServiceImpl implements EventService {
         response.setOrganizerName(event.getOrganizerName());
         response.setOrganizerContact(event.getOrganizerContact());
         response.setAverageRating(Math.round(averageRating * 10.0) / 10.0);
-        response.setReviewCount(reviews.size());
+        response.setReviewCount(reviewCount);
         return response;
     }
 

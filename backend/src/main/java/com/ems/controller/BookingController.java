@@ -1,5 +1,6 @@
 package com.ems.controller;
 
+import com.ems.dto.booking.BatchBookingRequest;
 import com.ems.dto.booking.BookingRequest;
 import com.ems.dto.booking.BookingResponse;
 import com.ems.entity.User;
@@ -36,6 +37,12 @@ public class BookingController {
     public ResponseEntity<BookingResponse> createBooking(@Valid @RequestBody BookingRequest request, Authentication authentication) {
         String email = authentication.getName();
         return ResponseEntity.status(HttpStatus.CREATED).body(bookingService.createBooking(email, request));
+    }
+
+    @PostMapping("/batch")
+    public ResponseEntity<List<BookingResponse>> createBookings(@Valid @RequestBody BatchBookingRequest request, Authentication authentication) {
+        String email = authentication.getName();
+        return ResponseEntity.status(HttpStatus.CREATED).body(bookingService.createBookings(email, request.getItems()));
     }
 
     @GetMapping("/my")

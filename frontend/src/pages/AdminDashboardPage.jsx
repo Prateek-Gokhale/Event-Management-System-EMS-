@@ -60,7 +60,7 @@ function AdminDashboardPage() {
           api.get("/events"),
           api.get("/admin/analytics"),
         ]);
-        setUsers(asArray(usersRes.data));
+        setUsers(asArray(usersRes.data).filter((appUser) => appUser.role !== "ADMIN"));
         setBookings(asArray(bookingsRes.data));
         setEvents(asArray(eventsRes.data));
         setAnalytics(analyticsRes.data);

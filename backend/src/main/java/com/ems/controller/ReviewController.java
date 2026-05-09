@@ -7,8 +7,11 @@ import com.ems.entity.Review;
 import com.ems.entity.User;
 import com.ems.exception.ResourceNotFoundException;
 import com.ems.repository.EventRepository;
+import com.ems.repository.BookingRepository;
 import com.ems.repository.ReviewRepository;
 import com.ems.repository.UserRepository;
+import com.ems.entity.enums.BookingStatus;
+import com.ems.exception.BadRequestException;
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,11 +31,13 @@ public class ReviewController {
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
+    private final BookingRepository bookingRepository;
 
-    public ReviewController(ReviewRepository reviewRepository, UserRepository userRepository, EventRepository eventRepository) {
+    public ReviewController(ReviewRepository reviewRepository, UserRepository userRepository, EventRepository eventRepository, BookingRepository bookingRepository) {
         this.reviewRepository = reviewRepository;
         this.userRepository = userRepository;
         this.eventRepository = eventRepository;
+        this.bookingRepository = bookingRepository;
     }
 
     @GetMapping
@@ -53,6 +58,9 @@ public class ReviewController {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
+        if (!bookingRepository.existsByUserIdAndEventIdAndStatus(user.getId(), eventId, BookingStatus.BOOKED)) {
+            throw new BadRequestException("Only users with accepted bookings can review this event");
+        }
         Review review = reviewRepository.findByUserEmailAndEventId(authentication.getName(), eventId)
                 .orElseGet(Review::new);
         review.setUser(user);

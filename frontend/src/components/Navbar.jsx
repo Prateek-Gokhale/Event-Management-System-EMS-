@@ -1,10 +1,12 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
+import { useTheme } from "../context/ThemeContext";
 
 function Navbar() {
   const { isAuthenticated, isAdmin, user, logout } = useAuth();
   const { count } = useCart();
+  const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -31,6 +33,15 @@ function Navbar() {
         </div>
 
         <div className="nav-actions">
+          <button
+            className="theme-toggle"
+            type="button"
+            onClick={toggleTheme}
+            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+            title={isDark ? "Light mode" : "Dark mode"}
+          >
+            <span aria-hidden="true" />
+          </button>
           {isAuthenticated ? (
             <>
               <span className="welcome">Hi, {user?.name?.split(" ")[0]}</span>

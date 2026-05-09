@@ -12,4 +12,5 @@ public interface AdminService {
     BookingResponse updateBookingStatus(Long bookingId, BookingStatusUpdateRequest request);
     BookingResponse checkInBooking(Long bookingId);
     AdminAnalyticsResponse getAnalytics();
+    void deleteUser(Long userId);
 }

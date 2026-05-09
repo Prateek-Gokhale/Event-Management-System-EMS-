@@ -1,18 +1,24 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../api/axiosClient";
 import { useAuth } from "../context/AuthContext";
 
+const EMPTY_FORM = {
+  name: "",
+  email: "",
+  password: "",
+};
+
 function RegisterPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
+  const [form, setForm] = useState(EMPTY_FORM);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setForm(EMPTY_FORM);
+  }, []);
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -35,7 +41,7 @@ function RegisterPage() {
 
   return (
     <div className="form-layout">
-      <form className="card form-card" onSubmit={handleSubmit}>
+      <form className="card form-card" onSubmit={handleSubmit} autoComplete="off">
         <h2>Create Account</h2>
         <p>Join EventHub and reserve your seats in seconds.</p>
         <label>
@@ -46,6 +52,7 @@ function RegisterPage() {
             value={form.name}
             onChange={handleChange}
             placeholder="Enter your name"
+            autoComplete="off"
             required
           />
         </label>
@@ -57,6 +64,7 @@ function RegisterPage() {
             value={form.email}
             onChange={handleChange}
             placeholder="you@example.com"
+            autoComplete="off"
             required
           />
         </label>
@@ -69,6 +77,7 @@ function RegisterPage() {
             onChange={handleChange}
             placeholder="Minimum 6 characters"
             minLength={6}
+            autoComplete="new-password"
             required
           />
         </label>

@@ -131,7 +131,7 @@ You can either run `database/ems_schema.sql` manually or let Spring Boot update 
 
 ```bash
 cd backend
-mvn spring-boot:run
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
 Default backend URL:
@@ -154,11 +154,21 @@ Default frontend URL:
 http://localhost:5173
 ```
 
-## Environment Variables
+### One-command local start on Windows
+
+From the project root:
+
+```powershell
+.\scripts\start-dev.ps1
+```
+
+This starts the backend with the `dev` profile before the Vite frontend, preventing proxy errors such as `ECONNREFUSED` for `/api/events`.
+
+## Local Environment Variables
 
 ### Backend
 
-The backend supports environment-based deployment configuration:
+The production profile requires explicit database, JWT, and CORS environment variables. For local development, run with the `dev` profile to use the demo defaults and seed data:
 
 ```env
 PORT=8081
@@ -168,14 +178,26 @@ DATABASE_PASSWORD=root123
 JWT_SECRET=replace-with-a-long-random-secret
 JWT_EXPIRATION_MS=86400000
 CORS_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
+EMAIL_NOTIFICATIONS_ENABLED=false
+EMAIL_FROM=no-reply@eventhub.local
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_USERNAME=your-smtp-user
+SMTP_PASSWORD=your-smtp-password
+SMTP_AUTH=true
+SMTP_STARTTLS_ENABLE=true
 ```
+
+Do not run production with the `dev` profile. The `dev` profile seeds demo credentials and sample events for local testing only.
+Set `EMAIL_NOTIFICATIONS_ENABLED=true` only when valid SMTP credentials are configured.
 
 ### Frontend
 
-Create `frontend/.env` when needed:
+Create `frontend/.env` only if your local backend is not running on the default URL:
 
 ```env
 VITE_API_BASE_URL=http://localhost:8081/api
+VITE_API_PROXY_TARGET=http://localhost:8081
 ```
 
 ## Sample Credentials
@@ -204,16 +226,6 @@ Frontend:
 cd frontend
 npm run build
 ```
-
-## Deployment Notes
-
-Current deployment split:
-
-- Frontend: Vercel
-- Backend: Railway
-- Database: Railway MySQL
-
-Set `VITE_API_BASE_URL` in the frontend host to your backend API URL, and set `CORS_ALLOWED_ORIGINS` in the backend host to your frontend domain.
 
 ## License
 

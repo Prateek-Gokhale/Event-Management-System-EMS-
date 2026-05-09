@@ -10,6 +10,17 @@ function getErrorMessage(error, fallback) {
   return error?.response?.data?.message || error?.message || fallback;
 }
 
+function getStatusLabel(booking) {
+  return booking.checkedIn ? "CHECKED IN" : booking.status;
+}
+
+function getStatusClass(booking) {
+  if (booking.checkedIn) return "ok";
+  if (booking.status === "BOOKED") return "ok";
+  if (booking.status === "PENDING") return "pending";
+  return "cancel";
+}
+
 function AdminBookingsPage() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -81,9 +92,9 @@ function AdminBookingsPage() {
               </tr>
             </thead>
             <tbody>
-              {bookings.map((booking) => (
+              {bookings.map((booking, index) => (
                 <tr key={booking.id}>
-                  <td>{booking.id}</td>
+                  <td>{index + 1}</td>
                   <td>{booking.userName}</td>
                   <td>{booking.eventName}</td>
                   <td>{formatDate(booking.eventDate)}</td>
@@ -92,26 +103,28 @@ function AdminBookingsPage() {
                   <td>{booking.paymentStatus || "N/A"}</td>
                   <td>{booking.ticketCode || "N/A"}</td>
                   <td>
-                    <span className={`status ${booking.status === "BOOKED" ? "ok" : booking.status === "PENDING" ? "pending" : "cancel"}`}>
-                      {booking.checkedIn ? "CHECKED IN" : booking.status}
+                    <span className={`status ${getStatusClass(booking)}`}>
+                      {getStatusLabel(booking)}
                     </span>
                   </td>
                   <td>
                     <div className="inline-actions">
-                      <button
-                        className="btn tiny"
-                        onClick={() => updateStatus(booking.id, "BOOKED")}
-                        disabled={booking.status !== "PENDING"}
-                      >
-                        Accept
-                      </button>
-                      <button
-                        className="btn tiny"
-                        onClick={() => checkIn(booking.id)}
-                        disabled={booking.checkedIn || booking.status !== "BOOKED"}
-                      >
-                        {booking.checkedIn ? "Checked In" : "Check In"}
-                      </button>
+                      {booking.status === "PENDING" && (
+                        <>
+                          <button className="btn tiny success" onClick={() => updateStatus(booking.id, "BOOKED")}>
+                            Accept
+                          </button>
+                          <button className="btn tiny danger" onClick={() => updateStatus(booking.id, "CANCELLED")}>
+                            Cancel
+                          </button>
+                        </>
+                      )}
+                      {booking.status === "BOOKED" && !booking.checkedIn && (
+                        <button className="btn tiny" onClick={() => checkIn(booking.id)}>
+                          Check In
+                        </button>
+                      )}
+                      {(booking.status === "CANCELLED" || booking.checkedIn) && <span className="muted-action">Done</span>}
                     </div>
                   </td>
                 </tr>

@@ -17,7 +17,11 @@ export function CartProvider({ children }) {
 
   const sync = (next) => {
     setItems(next);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    } catch {
+      // Cart persistence is optional; keep the in-memory cart usable.
+    }
   };
 
   const addToCart = (eventItem) => {

@@ -9,6 +9,7 @@ import com.ems.entity.User;
 import com.ems.entity.enums.BookingStatus;
 import com.ems.exception.BadRequestException;
 import com.ems.exception.ResourceNotFoundException;
+import com.ems.notification.BookingNotification;
 import com.ems.repository.BookingRepository;
 import com.ems.repository.CouponRepository;
 import com.ems.repository.EventRepository;
@@ -19,41 +20,67 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
+import java.util.Comparator;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class BookingServiceImpl implements BookingService {
+
+    private static final List<BookingStatus> ACTIVE_BOOKING_STATUSES = List.of(BookingStatus.BOOKED, BookingStatus.PENDING);
 
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
     private final CouponRepository couponRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public BookingServiceImpl(BookingRepository bookingRepository, UserRepository userRepository, EventRepository eventRepository, CouponRepository couponRepository) {
+    public BookingServiceImpl(
+            BookingRepository bookingRepository,
+            UserRepository userRepository,
+            EventRepository eventRepository,
+            CouponRepository couponRepository,
+            ApplicationEventPublisher eventPublisher
+    ) {
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
         this.eventRepository = eventRepository;
         this.couponRepository = couponRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
+    @Transactional
     public BookingResponse createBooking(String currentUserEmail, BookingRequest request) {
-        User user = userRepository.findByEmail(currentUserEmail)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        User user = findUser(currentUserEmail);
+        return createBookingForUser(user, request);
+    }
 
-        Event event = eventRepository.findById(request.getEventId())
+    @Override
+    @Transactional
+    public List<BookingResponse> createBookings(String currentUserEmail, List<BookingRequest> requests) {
+        Set<Long> eventIds = requests.stream()
+                .map(BookingRequest::getEventId)
+                .collect(Collectors.toSet());
+        if (eventIds.size() != requests.size()) {
+            throw new BadRequestException("Duplicate events are not allowed in one checkout");
+        }
+        User user = findUser(currentUserEmail);
+        return requests.stream()
+                .sorted(Comparator.comparing(BookingRequest::getEventId))
+                .map(request -> createBookingForUser(user, request))
+                .toList();
+    }
+
+    private BookingResponse createBookingForUser(User user, BookingRequest request) {
+        Event event = eventRepository.findLockedById(request.getEventId())
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
 
-        if (bookingRepository.existsByUserIdAndEventIdAndStatus(user.getId(), event.getId(), BookingStatus.BOOKED)
-                || bookingRepository.existsByUserIdAndEventIdAndStatus(user.getId(), event.getId(), BookingStatus.PENDING)) {
-            throw new BadRequestException("Event already booked by this user");
-        }
-        int capacity = event.getCapacity() == null ? 100 : event.getCapacity();
-        long bookedSeats = bookingRepository.countByEventIdAndStatus(event.getId(), BookingStatus.BOOKED);
-        if (bookedSeats >= capacity) {
-            throw new BadRequestException("Event is sold out");
-        }
+        validateBookingAllowed(user, event);
 
         Booking booking = new Booking();
         booking.setUser(user);
@@ -67,7 +94,25 @@ public class BookingServiceImpl implements BookingService {
         booking.setFinalPrice(applyCoupon(event.getPrice(), booking.getCouponCode()));
 
         Booking saved = bookingRepository.save(booking);
+        publishBookingNotification(saved, "Your booking request has been received. The organizer will review and confirm it soon.");
         return mapBookingResponse(saved);
+    }
+
+    private User findUser(String currentUserEmail) {
+        return userRepository.findByEmail(currentUserEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    }
+
+    private void validateBookingAllowed(User user, Event event) {
+        if (bookingRepository.existsByUserIdAndEventIdAndStatus(user.getId(), event.getId(), BookingStatus.BOOKED)
+                || bookingRepository.existsByUserIdAndEventIdAndStatus(user.getId(), event.getId(), BookingStatus.PENDING)) {
+            throw new BadRequestException("Event already booked by this user");
+        }
+        int capacity = event.getCapacity() == null ? 100 : event.getCapacity();
+        long reservedSeats = bookingRepository.countByEventIdAndStatusIn(event.getId(), ACTIVE_BOOKING_STATUSES);
+        if (reservedSeats >= capacity) {
+            throw new BadRequestException("Event is sold out");
+        }
     }
 
     @Override
@@ -86,6 +131,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional
     public BookingResponse checkInBooking(Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking not found with id: " + bookingId));
@@ -133,5 +179,18 @@ public class BookingServiceImpl implements BookingService {
 
     private String clean(String value, String fallback) {
         return value == null || value.isBlank() ? fallback : value.trim();
+    }
+
+    private void publishBookingNotification(Booking booking, String message) {
+        eventPublisher.publishEvent(new BookingNotification(
+                booking.getUser().getEmail(),
+                booking.getUser().getName(),
+                booking.getEvent().getName(),
+                booking.getEvent().getDate(),
+                booking.getStatus(),
+                booking.getTicketCode(),
+                booking.getFinalPrice(),
+                message
+        ));
     }
 }

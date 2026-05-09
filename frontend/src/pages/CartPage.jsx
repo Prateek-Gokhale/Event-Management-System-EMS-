@@ -17,11 +17,12 @@ function CartPage() {
   const total = items.reduce((sum, item) => sum + Number(item.price || 0), 0);
 
   const confirmBooking = async () => {
+    if (booking) return;
     setBooking(true);
     try {
-      for (const item of items) {
-        await api.post("/bookings", { eventId: item.id, couponCode, paymentMethod });
-      }
+      await api.post("/bookings/batch", {
+        items: items.map((item) => ({ eventId: item.id, couponCode, paymentMethod })),
+      });
       toast.success("Booking confirmed successfully");
       clearCart();
       navigate("/dashboard");
@@ -88,6 +89,7 @@ function CartPage() {
         onClose={() => setModalOpen(false)}
         onConfirm={confirmBooking}
         confirmText={booking ? "Booking..." : "Book Now"}
+        confirmDisabled={booking}
       >
         <p>You are booking {items.length} events.</p>
         <p>Total payable amount: {formatCurrency(total)}</p>

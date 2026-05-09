@@ -1,4 +1,4 @@
-function Modal({ open, title, children, onClose, onConfirm, confirmText = "Confirm" }) {
+function Modal({ open, title, children, onClose, onConfirm, confirmText = "Confirm", confirmDisabled = false }) {
   if (!open) return null;
 
   return (
@@ -10,7 +10,7 @@ function Modal({ open, title, children, onClose, onConfirm, confirmText = "Confi
           <button className="btn ghost" onClick={onClose}>
             Cancel
           </button>
-          <button className="btn primary" onClick={onConfirm}>
+          <button className="btn primary" onClick={onConfirm} disabled={confirmDisabled}>
             {confirmText}
           </button>
         </div>

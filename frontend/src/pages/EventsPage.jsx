@@ -37,18 +37,6 @@ function EventsPage() {
   }, [allEvents]);
 
   useEffect(() => {
-    const loadAllEvents = async () => {
-      try {
-        const res = await api.get("/events");
-        setAllEvents(asArray(res.data));
-      } catch {
-        toast.error("Could not load filter options");
-      }
-    };
-    loadAllEvents();
-  }, []);
-
-  useEffect(() => {
     const loadEvents = async () => {
       setLoading(true);
       try {
@@ -61,7 +49,11 @@ function EventsPage() {
         if (minPrice) params.minPrice = minPrice;
         if (maxPrice) params.maxPrice = maxPrice;
         const res = await api.get("/events", { params });
-        setEvents(asArray(res.data));
+        const nextEvents = asArray(res.data);
+        setEvents(nextEvents);
+        if (Object.keys(params).length === 0) {
+          setAllEvents(nextEvents);
+        }
       } catch {
         toast.error("Could not fetch events");
       } finally {
@@ -107,7 +99,7 @@ function EventsPage() {
         <h2>All Events</h2>
       </div>
 
-      <div className="filters">
+      <div className="filters events-filters">
         <select value={search} onChange={(e) => setSearch(e.target.value)}>
           {eventNames.map((name) => (
             <option key={name} value={name === "All" ? "" : name}>
