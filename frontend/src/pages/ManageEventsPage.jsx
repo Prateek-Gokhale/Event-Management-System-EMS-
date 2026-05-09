@@ -1,16 +1,22 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../api/axiosClient";
+import EmptyState from "../components/EmptyState";
 import Loader from "../components/Loader";
+import Modal from "../components/Modal";
+import SmartImage from "../components/SmartImage";
 import { asArray } from "../utils/apiData";
 import { formatCurrency, formatDate } from "../utils/format";
-import { optimizedImageUrl } from "../utils/images";
 
 function ManageEventsPage() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const mode = searchParams.get("mode") === "delete" ? "delete" : "update";
 
   const loadEvents = async () => {
     setLoading(true);
@@ -28,13 +34,18 @@ function ManageEventsPage() {
     loadEvents();
   }, []);
 
-  const onDelete = async (id) => {
+  const onDelete = async () => {
+    if (!selectedEvent) return;
+    setDeleting(true);
     try {
-      await api.delete(`/events/${id}`);
-      toast.success("Event deleted");
+      await api.delete(`/events/${selectedEvent.id}`);
+      toast.success(`${selectedEvent.name} deleted`);
+      setSelectedEvent(null);
       loadEvents();
-    } catch {
-      toast.error("Delete failed");
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Delete failed");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -42,19 +53,31 @@ function ManageEventsPage() {
 
   return (
     <section>
-      <div className="section-head">
-        <h2>Manage Events</h2>
+      <div className="section-head split">
+        <div>
+          <h2>{mode === "delete" ? "Delete Events" : "Update Events"}</h2>
+          <p className="section-note">
+            {mode === "delete"
+              ? "Select an event to remove it from the platform."
+              : "Select an event to update its details."}
+          </p>
+        </div>
       </div>
       {events.length === 0 ? (
-        <div className="empty">No events found.</div>
+        <EmptyState
+          title="No Events Found"
+          message="Create an event first, then return here to update or delete it."
+        />
       ) : (
         <div className="event-grid">
           {events.map((eventItem) => (
             <article key={eventItem.id} className="event-card">
-              <img
-                src={optimizedImageUrl(eventItem.imageUrl)}
+              <SmartImage
+                src={eventItem.imageUrl}
                 alt={eventItem.name}
                 className="event-image"
+                width={640}
+                height={360}
                 loading="lazy"
                 decoding="async"
               />
@@ -71,18 +94,35 @@ function ManageEventsPage() {
                   {eventItem.city ? ` - ${eventItem.city}` : ""}
                 </p>
                 <div className="card-actions">
-                  <button className="btn ghost" onClick={() => navigate(`/admin/events/${eventItem.id}/edit`)}>
-                    Edit
-                  </button>
-                  <button className="btn danger" onClick={() => onDelete(eventItem.id)}>
-                    Delete
-                  </button>
+                  {mode === "update" ? (
+                    <button className="btn primary full" onClick={() => navigate(`/admin/events/${eventItem.id}/edit`)}>
+                      Update Event
+                    </button>
+                  ) : (
+                    <button className="btn danger full" onClick={() => setSelectedEvent(eventItem)}>
+                      Delete Event
+                    </button>
+                  )}
                 </div>
               </div>
             </article>
           ))}
         </div>
       )}
+      <Modal
+        open={Boolean(selectedEvent)}
+        title="Delete Event"
+        onClose={() => setSelectedEvent(null)}
+        onConfirm={onDelete}
+        confirmText={deleting ? "Deleting..." : "Delete Event"}
+        confirmDisabled={deleting}
+        confirmVariant="danger"
+      >
+        <p>
+          Delete {selectedEvent?.name}? This removes the event and related bookings, favorites,
+          and reviews from the platform.
+        </p>
+      </Modal>
     </section>
   );
 }

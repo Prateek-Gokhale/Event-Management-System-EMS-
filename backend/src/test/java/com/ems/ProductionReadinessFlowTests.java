@@ -233,8 +233,8 @@ class ProductionReadinessFlowTests {
         booking.setBookingDate(LocalDateTime.now());
         booking.setStatus(status);
         booking.setFinalPrice(event.getPrice());
-        booking.setPaymentMethod("MOCK_CARD");
-        booking.setPaymentStatus("MOCK_PAID");
+        booking.setPaymentMethod("NONE");
+        booking.setPaymentStatus("NOT_REQUIRED");
         booking.setTicketCode("TEST-" + user.getId() + "-" + event.getId());
         return bookingRepository.save(booking);
     }

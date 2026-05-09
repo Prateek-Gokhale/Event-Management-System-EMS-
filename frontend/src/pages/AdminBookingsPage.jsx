@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../api/axiosClient";
+import EmptyState from "../components/EmptyState";
 import Loader from "../components/Loader";
 import { asArray } from "../utils/apiData";
 import { formatCurrency, formatDate } from "../utils/format";
@@ -74,7 +75,10 @@ function AdminBookingsPage() {
 
       <div className="table-wrap" id="booked-details">
         {bookings.length === 0 ? (
-          <div className="empty">No bookings available.</div>
+          <EmptyState
+            title="No Bookings Available"
+            message="Customer bookings will appear here after users complete checkout."
+          />
         ) : (
           <table>
             <thead>
@@ -85,7 +89,6 @@ function AdminBookingsPage() {
                 <th>Event Date</th>
                 <th>Booked On</th>
                 <th>Amount</th>
-                <th>Payment</th>
                 <th>Ticket</th>
                 <th>Status</th>
                 <th>Actions</th>
@@ -100,7 +103,6 @@ function AdminBookingsPage() {
                   <td>{formatDate(booking.eventDate)}</td>
                   <td>{formatDate(booking.bookingDate)}</td>
                   <td>{formatCurrency(booking.finalPrice || booking.eventPrice)}</td>
-                  <td>{booking.paymentStatus || "N/A"}</td>
                   <td>{booking.ticketCode || "N/A"}</td>
                   <td>
                     <span className={`status ${getStatusClass(booking)}`}>

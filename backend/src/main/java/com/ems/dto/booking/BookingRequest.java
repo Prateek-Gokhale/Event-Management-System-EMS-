@@ -8,7 +8,7 @@ public class BookingRequest {
     private Long eventId;
 
     private String couponCode;
-    private String paymentMethod = "MOCK_CARD";
+    private String paymentMethod;
 
     public Long getEventId() {
         return eventId;

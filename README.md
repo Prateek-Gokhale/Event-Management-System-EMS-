@@ -22,7 +22,7 @@ A full-stack Event Management System built with React, Spring Boot, JWT security
 - View event details with venue, city, organizer information, seats, map link, ratings, and reviews.
 - Save events to favorites.
 - Add events to cart and confirm bookings.
-- Apply mock coupons such as `WELCOME10` and `STUDENT20`.
+- Apply coupons such as `WELCOME10` and `STUDENT20`.
 - View booking status, ticket code, and QR payload from the dashboard.
 - Add event reviews and ratings.
 

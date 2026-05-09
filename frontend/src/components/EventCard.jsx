@@ -1,14 +1,16 @@
 import { Link } from "react-router-dom";
+import SmartImage from "./SmartImage";
 import { formatCurrency, formatDate } from "../utils/format";
-import { optimizedImageUrl } from "../utils/images";
 
 function EventCard({ event, onAddToCart, onToggleFavorite, isFavorite = false, showActions = true }) {
   return (
     <article className="event-card">
-      <img
-        src={optimizedImageUrl(event.imageUrl)}
+      <SmartImage
+        src={event.imageUrl}
         alt={event.name}
         className="event-image"
+        width={640}
+        height={360}
         loading="lazy"
         decoding="async"
       />

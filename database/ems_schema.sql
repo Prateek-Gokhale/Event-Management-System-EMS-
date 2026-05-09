@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS bookings (
     final_price DECIMAL(10, 2) DEFAULT 0.00,
     coupon_code VARCHAR(40),
     payment_method VARCHAR(40),
-    payment_status VARCHAR(24) DEFAULT 'MOCK_PAID',
+    payment_status VARCHAR(24) DEFAULT 'NOT_REQUIRED',
     ticket_code VARCHAR(80) UNIQUE,
     checked_in BIT(1) NOT NULL DEFAULT b'0',
     CONSTRAINT fk_booking_user FOREIGN KEY (user_id) REFERENCES users(id),

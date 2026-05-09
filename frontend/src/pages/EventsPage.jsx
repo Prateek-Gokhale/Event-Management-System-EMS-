@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import api from "../api/axiosClient";
+import EmptyState from "../components/EmptyState";
 import EventCard from "../components/EventCard";
-import Loader from "../components/Loader";
+import SkeletonGrid from "../components/SkeletonGrid";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { asArray } from "../utils/apiData";
@@ -21,6 +22,7 @@ function EventsPage() {
   const [loading, setLoading] = useState(true);
   const { addToCart } = useCart();
   const { isAuthenticated, isAdmin } = useAuth();
+  const hasActiveFilters = Boolean(search || category || city || from || to || minPrice || maxPrice);
 
   const categories = useMemo(() => {
     const set = new Set(allEvents.map((eventItem) => eventItem.category).filter(Boolean));
@@ -93,10 +95,25 @@ function EventsPage() {
     }
   };
 
+  const clearFilters = () => {
+    setSearch("");
+    setCategory("");
+    setCity("");
+    setFrom("");
+    setTo("");
+    setMinPrice("");
+    setMaxPrice("");
+  };
+
   return (
     <section>
-      <div className="section-head">
+      <div className="section-head split">
         <h2>All Events</h2>
+        {hasActiveFilters && (
+          <button className="btn ghost" type="button" onClick={clearFilters}>
+            Clear Filters
+          </button>
+        )}
       </div>
 
       <div className="filters events-filters">
@@ -132,11 +149,29 @@ function EventsPage() {
         <input type="number" min="0" placeholder="Min price" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} />
         <input type="number" min="0" placeholder="Max price" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} />
       </div>
+      {hasActiveFilters && (
+        <div className="filter-summary">
+          Showing filtered events
+          {category && ` - ${category}`}
+          {city && ` - ${city}`}
+          {search && ` - ${search}`}
+        </div>
+      )}
 
       {loading ? (
-        <Loader />
+        <SkeletonGrid count={6} />
       ) : events.length === 0 ? (
-        <div className="empty">No events found for this filter.</div>
+        <EmptyState
+          title="No Events Found"
+          message="Try clearing filters or choosing a different city, date, or price range."
+          action={
+            hasActiveFilters ? (
+              <button className="btn primary" type="button" onClick={clearFilters}>
+                Clear Filters
+              </button>
+            ) : null
+          }
+        />
       ) : (
         <div className="event-grid">
           {events.map((eventItem) => (

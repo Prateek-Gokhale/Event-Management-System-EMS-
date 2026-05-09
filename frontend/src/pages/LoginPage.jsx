@@ -9,7 +9,7 @@ const EMPTY_FORM = {
   password: "",
 };
 
-function LoginPage() {
+function LoginPage({ admin = false }) {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState(EMPTY_FORM);
@@ -28,13 +28,19 @@ function LoginPage() {
     setLoading(true);
     try {
       const res = await api.post("/auth/login", form);
+      const isAdminAccount = res.data.role === "ADMIN";
+      if (admin && !isAdminAccount) {
+        toast.error("Use the user login for attendee accounts");
+        return;
+      }
+      if (!admin && isAdminAccount) {
+        toast.error("Admins must use the admin login portal");
+        navigate("/admin/login");
+        return;
+      }
       login(res.data);
       toast.success("Login successful");
-      if (res.data.role === "ADMIN") {
-        navigate("/admin");
-      } else {
-        navigate("/");
-      }
+      navigate("/");
     } catch (error) {
       toast.error(error?.response?.data?.message || "Login failed");
     } finally {
@@ -45,8 +51,12 @@ function LoginPage() {
   return (
     <div className="form-layout">
       <form className="card form-card" onSubmit={handleSubmit} autoComplete="off">
-        <h2>Welcome Back</h2>
-        <p>Login to book events and manage your dashboard.</p>
+        <h2>{admin ? "Admin Login" : "User Login"}</h2>
+        <p>
+          {admin
+            ? "Sign in to manage events, bookings, customers, and analytics."
+            : "Sign in to book events, save favorites, and view your tickets."}
+        </p>
         <label>
           Email
           <input
@@ -72,14 +82,28 @@ function LoginPage() {
           />
         </label>
         <button className="btn primary full" disabled={loading} type="submit">
-          {loading ? "Logging in..." : "Login"}
+          {loading ? "Logging in..." : admin ? "Login as Admin" : "Login as User"}
         </button>
-        <p className="small-text">
-          Don&apos;t have an account? <Link to="/register">Register</Link>
-        </p>
+        {admin ? (
+          <p className="small-text">
+            Attendee account? <Link to="/login">User Login</Link>
+          </p>
+        ) : (
+          <>
+            <p className="small-text">
+              Don&apos;t have an account? <Link to="/register">Register</Link>
+            </p>
+            <p className="small-text">
+              Website administrator? <Link to="/admin/login">Admin Login</Link>
+            </p>
+          </>
+        )}
         <div className="demo-hint">
-          <span>Demo User: user@ems.com / User@123</span>
-          <span>Demo Admin: admin@ems.com / Admin@123</span>
+          {admin ? (
+            <span>Demo Admin: admin@ems.com / Admin@123</span>
+          ) : (
+            <span>Demo User: user@ems.com / User@123</span>
+          )}
         </div>
       </form>
     </div>

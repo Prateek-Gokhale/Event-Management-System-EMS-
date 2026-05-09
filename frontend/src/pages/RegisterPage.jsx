@@ -87,6 +87,9 @@ function RegisterPage() {
         <p className="small-text">
           Already have an account? <Link to="/login">Login</Link>
         </p>
+        <p className="small-text">
+          Website administrator? <Link to="/admin/login">Admin Login</Link>
+        </p>
       </form>
     </div>
   );

@@ -1,4 +1,13 @@
-function Modal({ open, title, children, onClose, onConfirm, confirmText = "Confirm", confirmDisabled = false }) {
+function Modal({
+  open,
+  title,
+  children,
+  onClose,
+  onConfirm,
+  confirmText = "Confirm",
+  confirmDisabled = false,
+  confirmVariant = "primary",
+}) {
   if (!open) return null;
 
   return (
@@ -10,7 +19,7 @@ function Modal({ open, title, children, onClose, onConfirm, confirmText = "Confi
           <button className="btn ghost" onClick={onClose}>
             Cancel
           </button>
-          <button className="btn primary" onClick={onConfirm} disabled={confirmDisabled}>
+          <button className={`btn ${confirmVariant}`} onClick={onConfirm} disabled={confirmDisabled}>
             {confirmText}
           </button>
         </div>

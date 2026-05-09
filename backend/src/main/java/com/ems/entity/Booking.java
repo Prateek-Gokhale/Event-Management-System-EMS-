@@ -47,7 +47,7 @@ public class Booking {
     private String paymentMethod;
 
     @Column(name = "payment_status", length = 24)
-    private String paymentStatus = "MOCK_PAID";
+    private String paymentStatus = "NOT_REQUIRED";
 
     @Column(name = "ticket_code", unique = true, length = 80)
     private String ticketCode;

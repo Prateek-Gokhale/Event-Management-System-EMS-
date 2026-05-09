@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
@@ -8,11 +9,16 @@ function Navbar() {
   const { count } = useCart();
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = () => {
+    const nextPath = isAdmin ? "/admin/login" : "/login";
     logout();
-    navigate("/login");
+    setMenuOpen(false);
+    navigate(nextPath);
   };
+
+  const closeMenu = () => setMenuOpen(false);
 
   return (
     <header className="navbar-wrap">
@@ -24,15 +30,27 @@ function Navbar() {
           EventHub
         </Link>
 
-        <div className="nav-links">
-          <NavLink to="/">Home</NavLink>
-          <NavLink to="/events">Events</NavLink>
-          {!isAdmin && isAuthenticated && <NavLink to="/cart">Cart ({count})</NavLink>}
-          {isAuthenticated && !isAdmin && <NavLink to="/dashboard">Dashboard</NavLink>}
-          {isAdmin && <NavLink to="/admin">Admin</NavLink>}
+        <button
+          className="nav-menu-toggle"
+          type="button"
+          onClick={() => setMenuOpen((current) => !current)}
+          aria-expanded={menuOpen}
+          aria-label="Toggle navigation menu"
+        >
+          <span />
+          <span />
+          <span />
+        </button>
+
+        <div className={`nav-links ${menuOpen ? "open" : ""}`}>
+          <NavLink to="/" onClick={closeMenu}>Home</NavLink>
+          <NavLink to="/events" onClick={closeMenu}>Events</NavLink>
+          {!isAdmin && isAuthenticated && <NavLink to="/cart" onClick={closeMenu}>Cart ({count})</NavLink>}
+          {isAuthenticated && !isAdmin && <NavLink to="/dashboard" onClick={closeMenu}>Dashboard</NavLink>}
+          {isAdmin && <NavLink to="/admin" onClick={closeMenu}>Admin</NavLink>}
         </div>
 
-        <div className="nav-actions">
+        <div className={`nav-actions ${menuOpen ? "open" : ""}`}>
           <button
             className="theme-toggle"
             type="button"
@@ -42,6 +60,7 @@ function Navbar() {
           >
             <span aria-hidden="true" />
           </button>
+          <div className="auth-actions">
           {isAuthenticated ? (
             <>
               <span className="welcome">Hi, {user?.name?.split(" ")[0]}</span>
@@ -51,14 +70,18 @@ function Navbar() {
             </>
           ) : (
             <>
-              <Link className="btn ghost" to="/login">
-                Login
+              <Link className="btn ghost" to="/login" onClick={closeMenu}>
+                User Login
               </Link>
-              <Link className="btn primary" to="/register">
+              <Link className="btn ghost" to="/admin/login" onClick={closeMenu}>
+                Admin
+              </Link>
+              <Link className="btn primary" to="/register" onClick={closeMenu}>
                 Join Now
               </Link>
             </>
           )}
+          </div>
         </div>
       </nav>
     </header>

@@ -88,8 +88,8 @@ public class BookingServiceImpl implements BookingService {
         booking.setBookingDate(LocalDateTime.now());
         booking.setStatus(BookingStatus.PENDING);
         booking.setCouponCode(cleanUpper(request.getCouponCode()));
-        booking.setPaymentMethod(clean(request.getPaymentMethod(), "MOCK_CARD"));
-        booking.setPaymentStatus("MOCK_PAID");
+        booking.setPaymentMethod(clean(request.getPaymentMethod(), "NONE"));
+        booking.setPaymentStatus("NOT_REQUIRED");
         booking.setTicketCode("EMS-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT));
         booking.setFinalPrice(applyCoupon(event.getPrice(), booking.getCouponCode()));
 

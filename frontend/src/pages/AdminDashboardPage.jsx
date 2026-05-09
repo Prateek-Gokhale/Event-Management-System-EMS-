@@ -116,11 +116,6 @@ function AdminDashboardPage() {
     <section>
       <div className="section-head split">
         <h2>Admin Dashboard</h2>
-        <div className="inline-actions">
-          <Link className="btn ghost" to="/admin/events/manage">
-            Manage Events
-          </Link>
-        </div>
       </div>
 
       <div className="operation-grid">
@@ -128,17 +123,17 @@ function AdminDashboardPage() {
           <strong>Add Event</strong>
           <span>Create a new event for users to book.</span>
         </Link>
-        <Link className="operation-card" to="/admin/events/manage">
+        <Link className="operation-card" to="/admin/events/manage?mode=update">
           <strong>Update Event</strong>
           <span>Edit event date, price, venue, capacity, and organizer details.</span>
         </Link>
-        <Link className="operation-card" to="/admin/events/manage">
+        <Link className="operation-card" to="/admin/events/manage?mode=delete">
           <strong>Delete Event</strong>
           <span>Remove events that should no longer be available.</span>
         </Link>
         <Link className="operation-card" to="/admin/bookings">
           <strong>Booked Details</strong>
-          <span>Review customer bookings, tickets, payment status, and check-ins.</span>
+          <span>Review customer bookings, tickets, approval status, and check-ins.</span>
         </Link>
         <Link className="operation-card" to="/admin/customers">
           <strong>View Customers</strong>

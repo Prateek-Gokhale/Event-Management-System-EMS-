@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+import AiHelpdeskChat from "./components/AiHelpdeskChat";
 import { Route, Routes, useLocation } from "react-router-dom";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Footer from "./components/Footer";
@@ -33,6 +34,7 @@ function App() {
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/admin/login" element={<LoginPage admin />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/events" element={<EventsPage />} />
               <Route path="/events/:id" element={<EventDetailsPage />} />
@@ -106,6 +108,7 @@ function App() {
         </ErrorBoundary>
       </main>
       <Footer />
+      <AiHelpdeskChat />
     </div>
   );
 }

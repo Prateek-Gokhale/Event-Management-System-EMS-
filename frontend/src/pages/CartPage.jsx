@@ -12,7 +12,6 @@ function CartPage() {
   const [booking, setBooking] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [couponCode, setCouponCode] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("MOCK_CARD");
 
   const total = items.reduce((sum, item) => sum + Number(item.price || 0), 0);
 
@@ -21,9 +20,9 @@ function CartPage() {
     setBooking(true);
     try {
       await api.post("/bookings/batch", {
-        items: items.map((item) => ({ eventId: item.id, couponCode, paymentMethod })),
+        items: items.map((item) => ({ eventId: item.id, couponCode })),
       });
-      toast.success("Booking confirmed successfully");
+      toast.success("Booking request submitted");
       clearCart();
       navigate("/dashboard");
     } catch (error) {
@@ -70,16 +69,11 @@ function CartPage() {
       <div className="cart-footer">
         <div className="coupon-box">
           <input placeholder="Coupon code" value={couponCode} onChange={(e) => setCouponCode(e.target.value)} />
-          <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
-            <option value="MOCK_CARD">Mock card</option>
-            <option value="MOCK_UPI">Mock UPI</option>
-            <option value="MOCK_WALLET">Mock wallet</option>
-          </select>
           <span>Try WELCOME10 or STUDENT20</span>
         </div>
         <h3>Total: {formatCurrency(total)}</h3>
         <button className="btn primary" onClick={() => setModalOpen(true)}>
-          Pay & Confirm
+          Submit Booking
         </button>
       </div>
 
@@ -88,12 +82,12 @@ function CartPage() {
         title="Confirm Booking"
         onClose={() => setModalOpen(false)}
         onConfirm={confirmBooking}
-        confirmText={booking ? "Booking..." : "Book Now"}
+        confirmText={booking ? "Submitting..." : "Submit Request"}
         confirmDisabled={booking}
       >
         <p>You are booking {items.length} events.</p>
-        <p>Total payable amount: {formatCurrency(total)}</p>
-        <p>Payment mode: {paymentMethod}. This app uses mock payment confirmation.</p>
+        <p>Estimated total amount: {formatCurrency(total)}</p>
+        <p>Your booking will be sent to the admin for approval.</p>
       </Modal>
     </section>
   );

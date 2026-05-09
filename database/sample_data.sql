@@ -32,5 +32,5 @@ INSERT INTO bookings (
     user_id, event_id, booking_date, status, final_price,
     payment_method, payment_status, ticket_code, checked_in
 ) VALUES
-(2, 1, '2026-05-01 14:10:00', 'BOOKED', 1499.00, 'MOCK_CARD', 'MOCK_PAID', 'EMS-SAMPLE1', b'0'),
-(2, 3, '2026-05-03 11:35:00', 'CANCELLED', 1999.00, 'MOCK_CARD', 'MOCK_PAID', 'EMS-SAMPLE2', b'0');
+(2, 1, '2026-05-01 14:10:00', 'BOOKED', 1499.00, 'NONE', 'NOT_REQUIRED', 'EMS-SAMPLE1', b'0'),
+(2, 3, '2026-05-03 11:35:00', 'CANCELLED', 1999.00, 'NONE', 'NOT_REQUIRED', 'EMS-SAMPLE2', b'0');

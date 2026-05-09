@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../api/axiosClient";
+import EmptyState from "../components/EmptyState";
 import EventCard from "../components/EventCard";
-import Loader from "../components/Loader";
+import SkeletonGrid from "../components/SkeletonGrid";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
@@ -82,7 +83,17 @@ function LandingPage() {
         </div>
 
         {loading ? (
-          <Loader />
+          <SkeletonGrid count={3} />
+        ) : featuredEvents.length === 0 ? (
+          <EmptyState
+            title="No Featured Events"
+            message="Add events from the admin dashboard and they will appear here."
+            action={
+              <Link className="btn primary" to="/events">
+                Browse Events
+              </Link>
+            }
+          />
         ) : (
           <div className="event-grid centered-events">
             {featuredEvents.map((eventItem) => (

@@ -3,11 +3,11 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../api/axiosClient";
 import Loader from "../components/Loader";
+import SmartImage from "../components/SmartImage";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { asArray } from "../utils/apiData";
 import { formatCurrency, formatDate } from "../utils/format";
-import { optimizedImageUrl } from "../utils/images";
 
 function EventDetailsPage() {
   const { id } = useParams();
@@ -81,10 +81,12 @@ function EventDetailsPage() {
 
   return (
     <section className="details-page">
-      <img
+      <SmartImage
         className="details-image"
-        src={optimizedImageUrl(eventItem.imageUrl, { width: 1100, height: 700 })}
+        src={eventItem.imageUrl}
         alt={eventItem.name}
+        width={1100}
+        height={700}
         decoding="async"
       />
       <div className="details-content">

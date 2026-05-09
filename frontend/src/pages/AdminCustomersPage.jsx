@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../api/axiosClient";
+import EmptyState from "../components/EmptyState";
 import Loader from "../components/Loader";
 import Modal from "../components/Modal";
 import { asArray } from "../utils/apiData";
@@ -60,7 +61,10 @@ function AdminCustomersPage() {
 
       <div className="table-wrap">
         {users.length === 0 ? (
-          <div className="empty">No customers available.</div>
+          <EmptyState
+            title="No Customers Available"
+            message="Registered customer accounts will appear here."
+          />
         ) : (
           <table>
             <thead>

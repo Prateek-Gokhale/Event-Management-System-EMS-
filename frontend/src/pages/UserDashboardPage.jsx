@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../api/axiosClient";
+import EmptyState from "../components/EmptyState";
 import Loader from "../components/Loader";
 import { asArray } from "../utils/apiData";
 import { formatCurrency, formatDate } from "../utils/format";
@@ -32,7 +34,15 @@ function UserDashboardPage() {
         <h2>My Bookings</h2>
       </div>
       {bookings.length === 0 ? (
-        <div className="empty">No bookings yet. Book an event to see it here.</div>
+        <EmptyState
+          title="No Bookings Yet"
+          message="Book an event to see tickets, status, and check-in details here."
+          action={
+            <Link className="btn primary" to="/events">
+              Browse Events
+            </Link>
+          }
+        />
       ) : (
         <div className="table-wrap">
           <table>
