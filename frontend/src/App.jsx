@@ -16,9 +16,12 @@ const AdminBookingsPage = lazy(() => import("./pages/AdminBookingsPage"));
 const AdminCustomersPage = lazy(() => import("./pages/AdminCustomersPage"));
 const AdminDashboardPage = lazy(() => import("./pages/AdminDashboardPage"));
 const CartPage = lazy(() => import("./pages/CartPage"));
+const CompanyPage = lazy(() => import("./pages/CompanyPage"));
 const EventDetailsPage = lazy(() => import("./pages/EventDetailsPage"));
 const EventsPage = lazy(() => import("./pages/EventsPage"));
 const ManageEventsPage = lazy(() => import("./pages/ManageEventsPage"));
+const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
+const TermsPage = lazy(() => import("./pages/TermsPage"));
 const UpdateEventPage = lazy(() => import("./pages/UpdateEventPage"));
 const UserDashboardPage = lazy(() => import("./pages/UserDashboardPage"));
 
@@ -38,6 +41,9 @@ function App() {
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/events" element={<EventsPage />} />
               <Route path="/events/:id" element={<EventDetailsPage />} />
+              <Route path="/privacy" element={<PrivacyPage />} />
+              <Route path="/terms" element={<TermsPage />} />
+              <Route path="/company" element={<CompanyPage />} />
               <Route
                 path="/cart"
                 element={
